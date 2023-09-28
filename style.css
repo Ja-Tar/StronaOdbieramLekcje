@@ -1,0 +1,128 @@
+:root {
+    --time: 10s;
+}
+
+body {
+    width: 100%;
+    background: blue;
+    position: relative;
+    margin: 0;
+}
+
+table {
+    font-family: arial, sans-serif;
+    color: rgb(255, 255, 255);
+    border-collapse: collapse;
+    width: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    position: inherit;
+    font-family: 'Jost', sans-serif;
+    font-size: 35px;
+}
+
+td,
+th {
+    text-align: center;
+    padding: 3px;
+    border-bottom: 2px solid #000000;
+}
+
+.top {
+    color: rgb(211, 211, 31);
+    font-size: 50px;
+}
+
+.sala {
+    color: rgb(0, 0, 0);
+    background-color: rgb(221, 221, 221);
+}
+
+.strikeout .sala {
+    text-decoration: none;
+    background-image: url(OBq3XE9.png);
+    background-repeat: inherit;
+    background-size: 100% 100%;
+}
+
+.strikeout .lekcje {
+    text-decoration: none;
+    background-image: url(OBq3XE9.png);
+    background-repeat: inherit;
+    background-size: 10% 100%;
+}
+
+.strikeout .klasa {
+    text-decoration: none;
+    background-image: url(OBq3XE9.png);
+    background-repeat: inherit;
+    background-size: 20% 100%;
+}
+
+.strikeout .inne {
+    text-decoration: none;
+    background-image: url(OBq3XE9.png);
+    background-repeat: initial;
+    background-size: 100% 100%;
+}
+
+/* SCROLL */
+
+.przewijak {
+    color: rgb(0, 0, 0);
+    background-color: rgb(221, 221, 221);
+    white-space:nowrap;
+}
+
+.przewijak b {
+    color: rgb(255, 0, 0);
+}
+
+.scroll-left {
+    
+    overflow: hidden;
+    position: relative;
+    top: 0;
+}
+
+.przewijak {
+    height: 50px;
+    width: 100%; /* Dostosuj szerokość według potrzeb */
+    height: 100%; /* Dostosuj wysokość według potrzeb */
+    overflow: hidden; /* Ukryj tekst poza kontenerem */
+    position: relative; /* Ustalamy pozycję jako relatywną, aby móc pozycjonować tekst wewnątrz */
+    padding: 0%;
+}
+
+.tekst {
+    white-space: nowrap; /* Zapobiega zawijaniu tekstu */
+    overflow: hidden; /* Ukryj tekst poza kontenerem */
+    animation: none; /* Wyłącz animację na początek */
+    padding-right: 20px;
+    padding-left: 20px;
+}
+
+select {
+    background-color: rgb(221, 221, 221);
+    color: rgb(0, 0, 0);
+    border: 2px solid rgb(0, 0, 0);
+    border-radius: 10px;
+    scroll-behavior: auto;
+}
+
+
+@keyframes przewijanie {
+    0% {
+        transform: translateX(calc(100% - 70px)); /* Przesunięcie na prawo poza kontener */
+    }
+    100% {
+        transform: translateX(-100%); /* Przesunięcie na lewo w obrębie kontenera */
+    }
+}
+
+.bottom {
+    position: fixed;
+    bottom: 1%;
+}
+

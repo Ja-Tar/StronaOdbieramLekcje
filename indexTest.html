@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan lekcji</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Plan lekcji</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Godziny</th>
+                <th>Nr lekcji</th>
+                <th>Poniedziałek</th>
+                <th>Wtorek</th>
+                <th>Środa</th>
+                <th>Czwartek</th>
+                <th>Piątek</th>
+                <th>Sobota</th>
+                <th>Niedziela</th>
+                <th>Nr lekcji</th>
+            </tr>
+        </thead>
+        <tbody id="dataBody">
+            <!-- Tutaj zostaną wstawione dane z tabeli -->
+        </tbody>
+    </table>
+
+    <script>
+        // Odczytaj dane przekazane przez URL i wstaw do tabeli
+        window.addEventListener('DOMContentLoaded', function () {
+            var urlParams = new URLSearchParams(window.location.search);
+            var dataParam = urlParams.get('data');
+            if (dataParam) {
+                var extractedData = JSON.parse(decodeURIComponent(dataParam));
+                var tbody = document.getElementById('dataBody');
+
+                extractedData.forEach(function (row) {
+                    var tr = document.createElement('tr');
+                    row.forEach(function (cellData) {
+                        var td = document.createElement('td');
+                        td.textContent = cellData;
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
