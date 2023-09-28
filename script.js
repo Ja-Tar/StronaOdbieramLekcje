@@ -86,6 +86,7 @@ function handleReceivedData(day) {
                 if (unsplit2b.split("!")[1] != null) {
                     unsplit2b = unsplit2b.split("!")[0]
                     var strikeout = true
+                    przes = true
                 }
                 createRowNormal(row[1].trim(), unsplit[0].trim(), unsplit2a.trim(), unsplit2b.trim(), strikeout);
             }
