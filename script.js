@@ -149,7 +149,7 @@ const selectElement = document.getElementById("day");
 selectElement.addEventListener("change", function () {
     const selectedOption = parseInt(selectElement.options[selectElement.selectedIndex].value);
     var x = document.getElementById('Tabela').childElementCount - 1;
-    while (x >= 1) {
+    while (x >= 0) {
         deleteRow(x)
         x = x - 1
     }
