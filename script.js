@@ -38,13 +38,13 @@ function createRowInfo(uwaga = true, tresc = 'TEST SYSTEMU - Informacje mogą by
 
     const przewijak = document.querySelectorAll('.przewijak');
 
-    przewijak.forEach(function (self) {
-        var kontenerSzerokosc = self.offsetWidth;
-        var text = self.querySelector('.tekst');
-        var tekstSzerokosc = text.scrollWidth;
-        var animacjaCzas = (tekstSzerokosc / kontenerSzerokosc) * 15; // 10s to początkowy czas trwania
-        text.style.animation = `przewijanie ${animacjaCzas}s linear infinite`;
-    })
+    //przewijak.forEach(function (self) {
+    //    var kontenerSzerokosc = self.offsetWidth;
+    //    var text = self.querySelector('.tekst');
+    //    var tekstSzerokosc = text.scrollWidth;
+    //    var animacjaCzas = (tekstSzerokosc / kontenerSzerokosc) * 15; // 10s to początkowy czas trwania
+    //    text.style.animation = `przewijanie ${animacjaCzas}s linear infinite`;
+    //})
 }
 
 function handleReceivedData(day) {
