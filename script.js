@@ -1,5 +1,7 @@
-var danetemp = []
-var iloscdanych = 0
+var danetemp = [];
+var iloscdanych = 0;
+var errorinfo = false;
+var lekcjazastepstwa = {};
 
 function deleteRow(row) {
     document.getElementById('Tabela').deleteRow(row);
@@ -47,54 +49,81 @@ function createRowInfo(uwaga = true, tresc = 'TEST SYSTEMU - Informacje mogą by
     //})
 }
 
+function formatLesson(lesson) {
+    var sformatowanaLista = [];
+
+    lesson.split(/\n/).forEach((element) => {
+        element = element.trim();
+        if (element.startsWith("- ")) {
+            element = element.replace("- ", "");
+        } else if (element.startsWith("-")) {
+            element = element.replace("-", "");
+        }
+
+        if (element.match(/s\./)) {
+            element.split(/s\./).forEach(el => {
+                if (el.trim().match(/\!s/)) {
+                    el.split(/\!s/).forEach(subEl => {
+                      sformatowanaLista.push(subEl.trim());
+                   });
+                }
+                sformatowanaLista.push(el.trim());
+            });
+        } else if (element.match(/\!s/)){
+            element.split(/\!s/).forEach(el => {
+                sformatowanaLista.push(el.trim());
+            });
+        } else {
+            sformatowanaLista.push(element.trim());
+        }
+    });
+
+    return sformatowanaLista;
+}
+
 function handleReceivedData(day) {
     console.log("Dane odebrane z dnia: " + day)
     data = danetemp
 
     // Zakłada, że dane są przesłane jako tablica obiektów
     data.forEach(function (row, index) {
+        if (row[2 + day] === "puste")  {
+            day = day + 1;
+        }
+
         // Iteruj przez komórki w danym wierszu (każda komórka zawiera lekcję)
-        var przes = false;
+        var strikeouted = false;
+        var zastepstwo = false;
+        var formatedlesson = formatLesson(row[2 + day]);
 
-        if (row[2 + day] != "") {
-            if (row[2 + day].startsWith("przesunięcie")) {
-                row[2 + day] = row[2 + day].replace("przesunięcie", "");
-                row[2 + day] = row[2 + day].replaceAll("\n", " ");
-                przes = true;
+        if (formatedlesson[0] === "odwołane") {
+            formatedlesson.splice(0, 1);
+            strikeouted = true;
+        } else if (formatedlesson[0] === "zastępstwo") {
+            formatedlesson.splice(0, 1);
+            zastepstwo = true;
+            if (formatLesson(row[3 + day])[0] === "odwołane") {
+                lekcjazastepstwa[day] = formatLesson(row[3 + day])[1]
+                row[3 + day] = "puste";
             }
-            try {
-                var unsplit = row[2 + day].split('-');
-            } catch (error) {
-                console.log(error);
-                return;
-            }
-            if (unsplit[1] != null) {
+        } else if (formatedlesson[0] === "przesunięcie") {
+            formatedlesson.splice(0, 1);
+            strikeouted = true;
+        }
 
+        if (formatedlesson[2] === "") {
+            formatedlesson[2] = "-"
+        }
 
-                if (unsplit[1].split('s.')[1] != null) {
-                    var unsplit2a = unsplit[1].split('s.')[0];
-                    var unsplit2b = unsplit[1].split('s.')[1];
-                } else if (unsplit[2] != null) {
-                    var unsplit2a = unsplit[2].split('s.')[0];
-                    var unsplit2b = unsplit[2].split('s.')[1];
-                } else {
-                    try {
-                        var unsplit2a = unsplit[1]
-                        var unsplit2b = "-"
-                    } catch (error) { }
-                }
-                if (unsplit2b.split("!")[1] != null) {
-                    unsplit2b = unsplit2b.split("!")[0]
-                    var strikeout = true
-                    przes = true
-                }
-                createRowNormal(row[1].trim(), unsplit[0].trim(), unsplit2a.trim(), unsplit2b.trim(), strikeout);
-            }
-            if (przes === true) {
-                createRowInfo(false, "Uwaga, nastąpiło przesunięcie powyższej lekcji na inny dzień!");
-            }
+        if (formatedlesson[0] != "") {
+            createRowNormal(row[1], formatedlesson[0], formatedlesson[1], formatedlesson[2], strikeouted);
+        }
+
+        if (zastepstwo) {
+            createRowInfo(true, "Zastępstwo z lekcji: " + lekcjazastepstwa[day]);
         }
     });
+
     switch (day) {
         case 0:
             daytext = 'Poniedziałek';
@@ -125,18 +154,23 @@ if (encodedData) {
     try {
         // Zdekoduj dane JSON
         var decodedData = JSON.parse(decodeURIComponent(encodedData));
-        console.log(decodedData);
 
         danetemp = decodedData
 
         // Przekaż dane do funkcji handleReceivedData
         handleReceivedData(0);
     } catch (e) {
-        if (e instanceof TypeError) { }
-        else {
+        if (e instanceof URIError) {
+            errorinfo = true;
+        } else {
             console.error("Coś poszło nie tak: " + e.message);
             createRowInfo(true, "WYSTĄPIŁ BŁĄD! - Przepraszamy za utrudnienia!")
         }
+    }
+
+    if (errorinfo === true) {
+        createRowInfo(true, "WYSTĄPIŁ BŁĄD! - Podano zły link!")
+        console.error("Coś poszło nie tak: " + e.message);
     }
 
 } else {
