@@ -81,12 +81,13 @@ function formatLesson(lesson) {
     return sformatowanaLista;
 }
 
-function handleReceivedData(day) {
-    console.log("Dane odebrane z dnia: " + day)
+function handleReceivedData(dayt) {
+    console.log("Dane odebrane z dnia: " + dayt)
     data = danetemp
 
     // Zakłada, że dane są przesłane jako tablica obiektów
     data.forEach(function (row, index) {
+        day = dayt
         if (row[2 + day] === "puste")  {
             day = day + 1;
         }
@@ -124,7 +125,7 @@ function handleReceivedData(day) {
         }
     });
 
-    switch (day) {
+    switch (dayt) {
         case 0:
             daytext = 'Poniedziałek';
             break;
