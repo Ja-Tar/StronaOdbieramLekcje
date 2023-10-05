@@ -41,7 +41,7 @@ th {
 
 .strikeout .sala {
     text-decoration: none;
-    background-image: url(OBq3XE9.png);
+    background-image: url(./zdjecia/OBq3XE9.png);
     background-repeat: inherit;
     background-size: 100% 100%;
 }
@@ -52,21 +52,21 @@ th {
 
 .strikeout .lekcje {
     text-decoration: none;
-    background-image: url(OBq3XE9.png);
+    background-image: url(./zdjecia/OBq3XE9.png);
     background-repeat: inherit;
     background-size: 10% 100%;
 }
 
 .strikeout .klasa {
     text-decoration: none;
-    background-image: url(OBq3XE9.png);
+    background-image: url(./zdjecia/OBq3XE9.png);
     background-repeat: inherit;
     background-size: 20% 100%;
 }
 
 .strikeout .inne {
     text-decoration: none;
-    background-image: url(OBq3XE9.png);
+    background-image: url(./zdjecia/OBq3XE9.png);
     background-repeat: initial;
     background-size: 100% 100%;
 }

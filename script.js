@@ -1,6 +1,5 @@
 var danetemp = [];
 var iloscdanych = 0;
-var errorinfo = false;
 var lekcjazastepstwa = {};
 
 function deleteRow(row) {
@@ -66,12 +65,12 @@ function formatLesson(lesson) {
             element.split(/s\./).forEach(el => {
                 if (el.trim().match(/\!s/)) {
                     el.split(/\!s/).forEach(subEl => {
-                      sformatowanaLista.push(subEl.trim());
-                   });
+                        sformatowanaLista.push(subEl.trim());
+                    });
                 }
                 sformatowanaLista.push(el.trim());
             });
-        } else if (element.match(/\!s/)){
+        } else if (element.match(/\!s/)) {
             element.split(/\!s/).forEach(el => {
                 sformatowanaLista.push(el.trim());
             });
@@ -92,12 +91,12 @@ function handleReceivedData(dayt) {
     data.forEach(function (row, index) {
         strikeouted = "";
         day = dayt
-        if (row[2 + day] === "puste")  {
+        if (row[2 + day] === "puste") {
             day = day + 1;
         }
 
         // Iteruj przez komórki w danym wierszu (każda komórka zawiera lekcję)
-        
+
         var zastepstwo = false;
         var formatedlesson = formatLesson(row[2 + day]);
 
@@ -138,7 +137,7 @@ function handleReceivedData(dayt) {
     if (strikeouted === "all") {
         createRowInfo(true, "Dzień wolny od lekcji")
     }
-        
+
     switch (dayt) {
         case 0:
             daytext = 'Poniedziałek';
@@ -160,36 +159,28 @@ function handleReceivedData(dayt) {
     document.title = ("Plan Lekcji: " + daytext)
 }
 
-
-// Pobierz dane z URL
 var urlParams = new URLSearchParams(window.location.search);
-var encodedData = urlParams.get('data');
+var jakiplan = decodeURIComponent(urlParams.get('jakiplan'));
 
-// Sprawdź, czy dane zostały przekazane w URL
-if (encodedData) {
+if (jakiplan != "null" && jakiplan != "") {
+    GetTimetable(jakiplan)
+} else {
+    GetTimetable("aktualny")
+    urlParams.set('jakiplan', "aktualny");
+    window.location.search = urlParams
+}
+
+async function GetTimetable(plik) {
+    const response = await fetch(`./planylekcji/${plik}.json`);
+
     try {
-        // Zdekoduj dane JSON
-        var decodedData = JSON.parse(decodeURIComponent(encodedData));
-
-        danetemp = decodedData
-
+        const datas = await response.json();
+        danetemp = datas;
         handleReceivedData(0)
     } catch (e) {
-        if (e instanceof URIError) {
-            errorinfo = true;
-        } else {
-            console.error("Coś poszło nie tak: " + e.message);
-            createRowInfo(true, "WYSTĄPIŁ BŁĄD! - Przepraszamy za utrudnienia!")
-        }
-    }
-
-    if (errorinfo === true) {
-        createRowInfo(true, "WYSTĄPIŁ BŁĄD! - Podano zły link!")
         console.error("Coś poszło nie tak: " + e.message);
+        createRowInfo(true, "WYSTĄPIŁ BŁĄD! - Przepraszamy za utrudnienia!")
     }
-
-} else {
-    window.location.replace('https://link.lange.waw.pl/plan');
 }
 
 const selectElement = document.getElementById("day");
