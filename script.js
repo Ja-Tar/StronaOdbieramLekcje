@@ -152,6 +152,7 @@ function handleReceivedData(dayt) {
             break;
     }
     createRowInfo(false, "Dane pobrane z dnia: " + daytext);
+    document.title = ("Plan Lekcji: " + daytext)
 }
 
 
