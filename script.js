@@ -7,7 +7,7 @@ function deleteRow(row) {
     document.getElementById('Tabela').deleteRow(row);
 }
 
-function createRowNormal(numer = 0, lekcja = "TEST", nauczyciel = "SYSTEMU", uwagi = "-", strikeout = false) {
+function createRowNormal(numer = 0, lekcja = "TEST", nauczyciel = "SYSTEMU", uwagi = "-", strikeout = "") {
     var x = document.getElementById('Tabela');
     var len = x.rows.length;
     // deep clone the targeted row
@@ -17,8 +17,10 @@ function createRowNormal(numer = 0, lekcja = "TEST", nauczyciel = "SYSTEMU", uwa
         <td id="${len}L" class="lekcje">${lekcja}</td>
         <td id="${len}K" class="klasa">${nauczyciel}</td>
         <td id="${len}I" class="inne">${uwagi}</td>`;
-    if (strikeout) {
+    if (strikeout === "lesson") {
         row.setAttribute("class", "strikeout")
+    } else if (strikeout === "all") {
+        row.setAttribute("class", "strikeoutall")
     }
 }
 
@@ -84,6 +86,7 @@ function formatLesson(lesson) {
 function handleReceivedData(dayt) {
     console.log("Dane odebrane z dnia: " + dayt)
     data = danetemp
+    var strikeouted = "";
 
     // Zakłada, że dane są przesłane jako tablica obiektów
     data.forEach(function (row, index) {
@@ -93,13 +96,13 @@ function handleReceivedData(dayt) {
         }
 
         // Iteruj przez komórki w danym wierszu (każda komórka zawiera lekcję)
-        var strikeouted = false;
+        
         var zastepstwo = false;
         var formatedlesson = formatLesson(row[2 + day]);
 
         if (formatedlesson[0] === "odwołane") {
             formatedlesson.splice(0, 1);
-            strikeouted = true;
+            strikeouted = "lesson";
         } else if (formatedlesson[0] === "zastępstwo") {
             formatedlesson.splice(0, 1);
             zastepstwo = true;
@@ -109,7 +112,10 @@ function handleReceivedData(dayt) {
             }
         } else if (formatedlesson[0] === "przesunięcie") {
             formatedlesson.splice(0, 1);
-            strikeouted = true;
+            strikeouted = "lesson";
+        } else if (formatedlesson[0] === "dzień wolny szkoły") {
+            formatedlesson.splice(0, 1);
+            strikeouted = "all";
         }
 
         if (formatedlesson[2] === "") {
@@ -124,7 +130,10 @@ function handleReceivedData(dayt) {
             createRowInfo(true, "Zastępstwo z lekcji: " + lekcjazastepstwa[day]);
         }
     });
-
+    if (strikeouted === "all") {
+        createRowInfo(true, "Dzień wolny od lekcji")
+    }
+        
     switch (dayt) {
         case 0:
             daytext = 'Poniedziałek';
@@ -158,8 +167,7 @@ if (encodedData) {
 
         danetemp = decodedData
 
-        // Przekaż dane do funkcji handleReceivedData
-        handleReceivedData(0);
+        handleReceivedData(0)
     } catch (e) {
         if (e instanceof URIError) {
             errorinfo = true;
@@ -175,7 +183,7 @@ if (encodedData) {
     }
 
 } else {
-    console.log('Brak danych do przetworzenia.');
+    window.location.replace('https://link.lange.waw.pl/plan');
 }
 
 const selectElement = document.getElementById("day");

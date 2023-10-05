@@ -46,6 +46,10 @@ th {
     background-size: 100% 100%;
 }
 
+.strikeoutall {
+    background-color: #ff0000;
+}
+
 .strikeout .lekcje {
     text-decoration: none;
     background-image: url(OBq3XE9.png);
@@ -124,5 +128,9 @@ select {
 .bottom {
     position: fixed;
     bottom: 1%;
+    font-size: 200%;
 }
 
+@media only screen and (max-width: 768px) {
+    /* For mobile phones: */
+}
