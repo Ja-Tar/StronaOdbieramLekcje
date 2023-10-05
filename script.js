@@ -128,7 +128,11 @@ function handleReceivedData(dayt) {
         }
 
         if (zastepstwo) {
-            createRowInfo(true, "Zastępstwo z lekcji: " + lekcjazastepstwa[day]);
+            if (lekcjazastepstwa[day]) {
+                createRowInfo(true, "Zastępstwo z lekcji: " + lekcjazastepstwa[day]);
+            } else {
+                createRowInfo(true, "Zastępstwo");
+            }
         }
     });
     if (strikeouted === "all") {
