@@ -86,6 +86,7 @@ function handleReceivedData(dayt) {
     console.log("Dane odebrane z dnia: " + dayt)
     data = danetemp
     var strikeouted = "";
+    var strikeoutedtemp = "";
 
     // Zakłada, że dane są przesłane jako tablica obiektów
     data.forEach(function (row, index) {
@@ -116,6 +117,7 @@ function handleReceivedData(dayt) {
         } else if (formatedlesson[0] === "dzień wolny szkoły") {
             formatedlesson.splice(0, 1);
             strikeouted = "all";
+            strikeoutedtemp = strikeouted;
         }
 
         if (formatedlesson[2] === "") {
@@ -134,7 +136,7 @@ function handleReceivedData(dayt) {
             }
         }
     });
-    if (strikeouted === "all") {
+    if (strikeoutedtemp === "all") {
         createRowInfo(true, "Dzień wolny od lekcji")
     }
 
