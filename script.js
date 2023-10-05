@@ -90,6 +90,7 @@ function handleReceivedData(dayt) {
 
     // Zakłada, że dane są przesłane jako tablica obiektów
     data.forEach(function (row, index) {
+        strikeouted = "";
         day = dayt
         if (row[2 + day] === "puste")  {
             day = day + 1;
