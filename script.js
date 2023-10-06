@@ -1,6 +1,7 @@
 var danetemp = [];
 var iloscdanych = 0;
 var lekcjazastepstwa = {};
+var errornow = false;
 
 function deleteRow(row) {
     document.getElementById('Tabela').deleteRow(row);
@@ -39,8 +40,7 @@ function createRowInfo(uwaga = true, tresc = 'TEST SYSTEMU - Informacje mogą by
         ${uwagatext}${tresc}
         </div></td>`;
 
-    const przewijak = document.querySelectorAll('.przewijak');
-
+    //const przewijak = document.querySelectorAll('.przewijak');
     //przewijak.forEach(function (self) {
     //    var kontenerSzerokosc = self.offsetWidth;
     //    var text = self.querySelector('.tekst');
@@ -104,6 +104,10 @@ function handleReceivedData(dayt) {
         if (formatedlesson[0] === "odwołane") {
             formatedlesson.splice(0, 1);
             strikeouted = "lesson";
+            if (formatLesson(row[3 + day])[1] === "przesunięcie") {
+                lekcjazastepstwa[day] = formatLesson(row[3 + day])[1]
+                row[3 + day] = "puste";
+            }
         } else if (formatedlesson[0] === "zastępstwo") {
             formatedlesson.splice(0, 1);
             zastepstwo = true;
@@ -175,6 +179,23 @@ if (jakiplan != "null" && jakiplan != "") {
 async function GetTimetable(plik) {
     const response = await fetch(`./planylekcji/${plik}.json`);
 
+    var urlParams = new URLSearchParams(window.location.search);
+    var jakiplan = decodeURIComponent(urlParams.get('jakiplan'));
+
+    if (!response.ok) {
+        console.error("Nie udało się pobrać danych z serwera");
+
+        if (jakiplan == "staryplan" || jakiplan == "nowyplan") {
+            GetTimetable("aktualny")
+            urlParams.set('jakiplan', "aktualny");
+            window.location.search = urlParams
+        }
+
+        createRowInfo(true, "ZŁY LINK! - Przepraszamy za utrudnienia!")
+        errornow = true;
+        return;
+    }
+
     try {
         const datas = await response.json();
         danetemp = datas;
@@ -182,6 +203,8 @@ async function GetTimetable(plik) {
     } catch (e) {
         console.error("Coś poszło nie tak: " + e.message);
         createRowInfo(true, "WYSTĄPIŁ BŁĄD! - Przepraszamy za utrudnienia!")
+        errornow = true;
+        return;
     }
 }
 
@@ -195,5 +218,11 @@ selectElement.addEventListener("change", function () {
         deleteRow(x)
         x = x - 1
     }
+    
+    if (errornow === true) {
+        createRowInfo(true, "WYSTĄPIŁ BŁĄD! - Przepraszamy za utrudnienia!");
+        return;
+    }
+
     handleReceivedData(selectedOption)
 });
