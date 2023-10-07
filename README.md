@@ -1,2 +1,2 @@
-# PlanLekcjiPokazator
+# StronaOdbieramLekcje
  
