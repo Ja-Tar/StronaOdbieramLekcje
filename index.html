@@ -16,25 +16,28 @@
 
 <body>
     <div id="container">
-    <table>
-        <thead>
-            <tr class="top">
-                <th id="0S">Numer</th>
-                <th id="0L">Lekcja</th>
-                <th id="0K">Nauczyciel</th>
-                <th id="0I">Sala</th>
-            </tr>
-        </thead>
-        <tbody id="Tabela">
-        </tbody>
-    </table>
-    <select name="Dzień" id="day" class="bottom">
-        <option value=0>Poniedziałek</option>
-        <option value=1>Wtorek</option>
-        <option value=2>Środa</option>
-        <option value=3>Czwartek</option>
-        <option value=4>Piątek</option>
-    </select>
+        <table>
+            <thead>
+                <tr class="top">
+                    <th id="0S">Numer</th>
+                    <th id="0L">Lekcja</th>
+                    <th id="0K">Nauczyciel</th>
+                    <th id="0I">Sala</th>
+                </tr>
+            </thead>
+            <tbody id="Tabela">
+            </tbody>
+        </table>
+        <div class="bottom">
+            <select name="Dzień" id="day">
+                <option value=0>Poniedziałek</option>
+                <option value=1>Wtorek</option>
+                <option value=2>Środa</option>
+                <option value=3>Czwartek</option>
+                <option value=4>Piątek</option>
+            </select>
+            <button id="nickname" onclick="nicknameschange()">Przezwiska</button>
+        </div>
     </div>
     <script src="script.js" async defer></script>
 </body>

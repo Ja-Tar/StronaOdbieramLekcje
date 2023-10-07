@@ -2,6 +2,8 @@ var danetemp = [];
 var iloscdanych = 0;
 var lekcjazastepstwa = {};
 var errornow = false;
+var nicknamesstate = false;
+const selectElement = document.getElementById("day");
 
 function deleteRow(row) {
     document.getElementById('Tabela').deleteRow(row);
@@ -181,6 +183,19 @@ async function GetTimetable(plik) {
 
     var urlParams = new URLSearchParams(window.location.search);
     var jakiplan = decodeURIComponent(urlParams.get('jakiplan'));
+    var dizin = decodeURIComponent(urlParams.get('dzien'));
+
+    if (!dizin || dizin === "null" || dizin === "") {
+        dizin = 0;
+        urlParams.set('dzien', "0");
+        window.location.search = urlParams;
+    } else if (dizin > 5) {
+        dizin = 0;
+        urlParams.set('dzien', "0");
+        window.location.search = urlParams;
+    } else {
+        selectElement.value = dizin;
+    }
 
     if (!response.ok) {
         console.error("Nie udało się pobrać danych z serwera");
@@ -199,7 +214,7 @@ async function GetTimetable(plik) {
     try {
         const datas = await response.json();
         danetemp = datas;
-        handleReceivedData(0)
+        handleReceivedData(parseInt(dizin))
     } catch (e) {
         console.error("Coś poszło nie tak: " + e.message);
         createRowInfo(true, "WYSTĄPIŁ BŁĄD! - Przepraszamy za utrudnienia!")
@@ -208,12 +223,12 @@ async function GetTimetable(plik) {
     }
 }
 
-const selectElement = document.getElementById("day");
 
 // Add an event listener for the change event
 selectElement.addEventListener("change", function () {
     const selectedOption = parseInt(selectElement.options[selectElement.selectedIndex].value);
     var x = document.getElementById('Tabela').childElementCount - 1;
+
     while (x >= 0) {
         deleteRow(x)
         x = x - 1
@@ -223,6 +238,57 @@ selectElement.addEventListener("change", function () {
         createRowInfo(true, "WYSTĄPIŁ BŁĄD! - Przepraszamy za utrudnienia!");
         return;
     }
-
-    handleReceivedData(selectedOption)
+    
+    handleReceivedData(selectedOption);
+    nicknames(nicknamesstate);
 });
+
+function nicknameschange() {
+    console.log("Nicknames changed");
+    var nicknamebutton = document.getElementById("nickname");
+
+    if (nicknamebutton.innerHTML === "Imię i Nazwisko") {
+        nicknamebutton.innerHTML = "Przezwiska";
+        nicknames(false);
+        nicknamesstate = false;
+    } else {
+        nicknamebutton.innerHTML = "Imię i Nazwisko";
+        nicknames(true);
+        nicknamesstate = true;
+    }
+}
+
+async function nicknames(change) {
+    const response = await fetch(`./inne/przezwiska.json`);
+
+    if (!response.ok) {
+        console.error("Nie udało się pobrać danych z serwera przezwisk");
+    }
+
+    przeswiska = {};
+    przeswiska = await response.json();
+
+    var rows = document.getElementById("Tabela").getElementsByTagName("tr");
+    for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var cell = row.getElementsByTagName("td")[2];
+        if (cell === undefined) {
+            continue;
+        }
+        if (change) {
+            for (var j = 0; j < Object.keys(przeswiska).length; j++) {
+                if (cell.innerHTML.replace(/&nbsp;/g, ' ') === Object.keys(przeswiska)[j]) {
+                    cell.innerHTML = Object.values(przeswiska)[j];
+                    break;
+                }
+            }
+        } else {
+            for (var j = 0; j < Object.keys(przeswiska).length; j++) {
+                if (cell.innerHTML.replace(/&nbsp;/g, ' ') === Object.values(przeswiska)[j]) {
+                    cell.innerHTML = Object.keys(przeswiska)[j];
+                    break;
+                }
+            }
+        }
+    }
+}

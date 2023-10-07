@@ -107,7 +107,7 @@ th {
     padding-left: 20px;
 }
 
-select {
+select, button {
     background-color: rgb(221, 221, 221);
     color: rgb(0, 0, 0);
     border: 2px solid rgb(0, 0, 0);
@@ -128,6 +128,14 @@ select {
 .bottom {
     position: fixed;
     bottom: 1%;
+}
+
+#day {
+    font-size: 200%;
+}
+
+#nickname {
+    left: auto;
     font-size: 200%;
 }
 
