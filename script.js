@@ -89,8 +89,7 @@ function formatLesson(lesson) {
 
 function handleReceivedData(dayt) {
     console.log("Dane odebrane z dnia: " + dayt);
-    var strikeoutedtemp = "";
-    let ostatnialekcjanr = "";
+    let ostatnialekcjanr = 0;
 
     danetemp.forEach(function (row, index) {
         var strikeouted = "";
@@ -123,7 +122,8 @@ function handleReceivedData(dayt) {
         } else if (formatedlesson[0] === "dzień wolny szkoły") {
             formatedlesson.splice(0, 1);
             strikeouted = "all";
-            strikeoutedtemp = strikeouted;
+        } else if (formatedlesson[0] !== "") {
+            ostatnialekcjanr = row[1];
         }
 
         if (formatedlesson[2] === "") {
@@ -132,7 +132,6 @@ function handleReceivedData(dayt) {
 
         if (formatedlesson[0] !== "") {
             createRowNormal(row[1], formatedlesson[0], formatedlesson[1], formatedlesson[2], strikeouted);
-            ostatnialekcjanr = row[1];
         }
 
         if (zastepstwo) {
@@ -141,8 +140,9 @@ function handleReceivedData(dayt) {
         }
     });
 
-    if (strikeoutedtemp === "all") {
+    if (ostatnialekcjanr === 0) {
         createRowInfo(true, "Dzień wolny od lekcji");
+        ostatnialekcjanr = "🎉 BRAK";
     }
 
     createRowInfo(false, "Dzień: " + getDayText(dayt) + " | " + ostatnialekcjanr + " lekcji | Plan z dnia: " + jakiplan);
@@ -183,9 +183,32 @@ async function GetTimetable() {
 
     try {
         const listData = await listResponse.json();
+        let plikaktualny = 0;
+
+        // Sprawdź, w pętli czy pierwszy plan jest Arrayem
+        for (const plan of listData) {
+            if (Array.isArray(plan)) {
+                if (plan[0] === jakiplan) {
+                    break;
+                } else {
+                    plikaktualny++;
+                }
+            }
+        }
+
+        if (jakiplan === "nowy") {
+            jakiplan = listData[0][0];
+            urlParams.set('jakiplan', jakiplan);
+            window.location.search = urlParams;
+            return;
+        }
 
         // Sprawdź, czy jakiplan znajduje się na liście, jeśli nie to użyj pierwszego pliku
-        const selectedPlan = listData.includes(jakiplan) ? jakiplan : listData[0];
+        let selectedPlan = listData.includes(jakiplan) ? jakiplan : listData[plikaktualny];
+
+        if (Array.isArray(selectedPlan)) {
+            selectedPlan = selectedPlan[0];
+        }
 
         // Jeśli jakiplan nie był na liście, zmień parametr w URL
         if (jakiplan !== selectedPlan) {
