@@ -9,47 +9,50 @@ function deleteRow(row) {
     document.getElementById('Tabela').deleteRow(row);
 }
 
-function createRowNormal(numer = 0, lekcja = "TEST", nauczyciel = "SYSTEMU", uwagi = "-", strikeout = "") {
+function createRow(cells, strikeout = "") {
     var x = document.getElementById('Tabela');
     var len = x.rows.length;
-    // deep clone the targeted row
-    row = x.insertRow(len)
-    row.innerHTML =
-        `<td id="${len}S" class="sala">${numer}</td>
-        <td id="${len}L" class="lekcje">${lekcja}</td>
-        <td id="${len}K" class="klasa">${nauczyciel}</td>
-        <td id="${len}I" class="inne">${uwagi}</td>`;
-    if (strikeout === "lesson") {
-        row.setAttribute("class", "strikeout")
-    } else if (strikeout === "all") {
-        row.setAttribute("class", "strikeoutall")
+    row = x.insertRow(len);
+
+    for (var i = 0; i < cells.length; i++) {
+        var cell = row.insertCell(i);
+        cell.id = len + String.fromCharCode(65 + i);
+        cell.className = getClassName(i);
+        cell.innerHTML = cells[i];
+    }
+
+    if (strikeout !== "") {
+        row.className = "strikeout" + (strikeout === "all" ? "all" : "");
     }
 }
 
-function createRowInfo(uwaga = true, tresc = 'TEST SYSTEMU - Informacje mogą być nie prawidłowe!') {
+function getClassName(index) {
+    switch (index) {
+        case 0:
+            return "sala";
+        case 1:
+            return "lekcje";
+        case 2:
+            return "klasa";
+        case 3:
+            return "inne";
+        default:
+            return "";
+    }
+}
+
+function createRowNormal(numer = 0, lekcja = "TEST", nauczyciel = "SYSTEMU", uwagi = "-", strikeout = "") {
+    var cells = [numer, lekcja, nauczyciel, uwagi];
+    createRow(cells, strikeout);
+}
+
+function createRowInfo(uwaga = true, tresc = 'TEST SYSTEMU - Informacje mogą być nieprawidłowe!') {
     var x = document.getElementById('Tabela');
     var len = x.rows.length;
-    // deep clone the targeted row
-    row = x.insertRow(len)
-    if (uwaga == true) {
-        var uwagatext = '<b>UWAGA:</b> '
-    }
-    else {
-        var uwagatext = ''
-    }
-    row.innerHTML =
-        `<td colspan="4" class="przewijak"><div class="tekst">
-        ${uwagatext}${tresc}
-        </div></td>`;
+    row = x.insertRow(len);
 
-    //const przewijak = document.querySelectorAll('.przewijak');
-    //przewijak.forEach(function (self) {
-    //    var kontenerSzerokosc = self.offsetWidth;
-    //    var text = self.querySelector('.tekst');
-    //    var tekstSzerokosc = text.scrollWidth;
-    //    var animacjaCzas = (tekstSzerokosc / kontenerSzerokosc) * 15; // 10s to początkowy czas trwania
-    //    text.style.animation = `przewijanie ${animacjaCzas}s linear infinite`;
-    //})
+    var uwagatext = (uwaga ? '<b>UWAGA:</b> ' : '');
+    row.innerHTML = `<td colspan="4" class="tekst przewijak">${uwagatext}${tresc}</td>`;
 }
 
 function formatLesson(lesson) {
@@ -85,20 +88,17 @@ function formatLesson(lesson) {
 }
 
 function handleReceivedData(dayt) {
-    console.log("Dane odebrane z dnia: " + dayt)
-    data = danetemp
-    var strikeouted = "";
+    console.log("Dane odebrane z dnia: " + dayt);
     var strikeoutedtemp = "";
+    let ostatnialekcjanr = "";
 
-    // Zakłada, że dane są przesłane jako tablica obiektów
-    data.forEach(function (row, index) {
-        strikeouted = "";
-        day = dayt
+    danetemp.forEach(function (row, index) {
+        var strikeouted = "";
+        var day = dayt;
+
         if (row[2 + day] === "puste") {
             day = day + 1;
         }
-
-        // Iteruj przez komórki w danym wierszu (każda komórka zawiera lekcję)
 
         var zastepstwo = false;
         var formatedlesson = formatLesson(row[2 + day]);
@@ -107,14 +107,14 @@ function handleReceivedData(dayt) {
             formatedlesson.splice(0, 1);
             strikeouted = "lesson";
             if (formatLesson(row[3 + day])[1] === "przesunięcie") {
-                lekcjazastepstwa[day] = formatLesson(row[3 + day])[1]
+                lekcjazastepstwa[day] = formatLesson(row[3 + day])[1];
                 row[3 + day] = "puste";
             }
         } else if (formatedlesson[0] === "zastępstwo") {
             formatedlesson.splice(0, 1);
             zastepstwo = true;
             if (formatLesson(row[3 + day])[0] === "odwołane") {
-                lekcjazastepstwa[day] = formatLesson(row[3 + day])[1]
+                lekcjazastepstwa[day] = formatLesson(row[3 + day])[1];
                 row[3 + day] = "puste";
             }
         } else if (formatedlesson[0] === "przesunięcie") {
@@ -127,118 +127,125 @@ function handleReceivedData(dayt) {
         }
 
         if (formatedlesson[2] === "") {
-            formatedlesson[2] = "-"
+            formatedlesson[2] = "-";
         }
 
-        if (formatedlesson[0] != "") {
+        if (formatedlesson[0] !== "") {
             createRowNormal(row[1], formatedlesson[0], formatedlesson[1], formatedlesson[2], strikeouted);
+            ostatnialekcjanr = row[1];
         }
 
         if (zastepstwo) {
-            if (lekcjazastepstwa[day]) {
-                createRowInfo(true, "Zastępstwo z lekcji: " + lekcjazastepstwa[day]);
-            } else {
-                createRowInfo(true, "Zastępstwo");
-            }
+            var zastepstwoText = lekcjazastepstwa[day] ? "Zastępstwo z lekcji: " + lekcjazastepstwa[day] : "Zastępstwo";
+            createRowInfo(true, zastepstwoText);
         }
     });
+
     if (strikeoutedtemp === "all") {
-        createRowInfo(true, "Dzień wolny od lekcji")
+        createRowInfo(true, "Dzień wolny od lekcji");
     }
 
+    createRowInfo(false, "Dzień: " + getDayText(dayt) + " | " + ostatnialekcjanr + " lekcji | Plan z dnia: " + jakiplan);
+    document.title = "Plan Lekcji: " + getDayText(dayt);
+}
+
+function getDayText(dayt) {
     switch (dayt) {
         case 0:
-            daytext = 'Poniedziałek';
-            break;
+            return 'Poniedziałek';
         case 1:
-            daytext = 'Wtorek';
-            break;
+            return 'Wtorek';
         case 2:
-            daytext = 'Środa';
-            break;
+            return 'Środa';
         case 3:
-            daytext = 'Czwartek';
-            break;
+            return 'Czwartek';
         case 4:
-            daytext = 'Piątek';
-            break;
+            return 'Piątek';
     }
-    createRowInfo(false, "Dane pobrane z dnia: " + daytext);
-    document.title = ("Plan Lekcji: " + daytext)
 }
 
 var urlParams = new URLSearchParams(window.location.search);
 var jakiplan = decodeURIComponent(urlParams.get('jakiplan'));
 
-if (jakiplan != "null" && jakiplan != "") {
-    GetTimetable(jakiplan)
+if (jakiplan !== "null" && jakiplan !== "") {
+    GetTimetable();
 } else {
-    GetTimetable("aktualny")
-    urlParams.set('jakiplan', "aktualny");
-    window.location.search = urlParams
+    GetTimetable();
 }
 
-async function GetTimetable(plik) {
-    const response = await fetch(`./planylekcji/${plik}.json`);
+async function GetTimetable() {
+    const listResponse = await fetch('./planylekcji/lista.json');
 
-    var urlParams = new URLSearchParams(window.location.search);
-    var jakiplan = decodeURIComponent(urlParams.get('jakiplan'));
-    var dizin = decodeURIComponent(urlParams.get('dzien'));
-
-    if (!dizin || dizin === "null" || dizin === "") {
-        dizin = 0;
-        urlParams.set('dzien', "0");
-        window.location.search = urlParams;
-    } else if (dizin > 5) {
-        dizin = 0;
-        urlParams.set('dzien', "0");
-        window.location.search = urlParams;
-    } else {
-        selectElement.value = dizin;
-    }
-
-    if (!response.ok) {
-        console.error("Nie udało się pobrać danych z serwera");
-
-        if (jakiplan == "staryplan" || jakiplan == "nowyplan") {
-            GetTimetable("aktualny")
-            urlParams.set('jakiplan', "aktualny");
-            window.location.search = urlParams
-        }
-
-        createRowInfo(true, "ZŁY LINK! - Przepraszamy za utrudnienia!")
-        errornow = true;
+    if (!listResponse.ok) {
+        handleErrorResponse();
         return;
     }
 
     try {
-        const datas = await response.json();
-        danetemp = datas;
-        handleReceivedData(parseInt(dizin))
+        const listData = await listResponse.json();
+
+        // Sprawdź, czy jakiplan znajduje się na liście, jeśli nie to użyj pierwszego pliku
+        const selectedPlan = listData.includes(jakiplan) ? jakiplan : listData[0];
+
+        // Jeśli jakiplan nie był na liście, zmień parametr w URL
+        if (jakiplan !== selectedPlan) {
+            urlParams.set('jakiplan', selectedPlan);
+            window.location.search = urlParams;
+        }
+
+        const timetableResponse = await fetch(`./planylekcji/${selectedPlan}.json`);
+        if (!timetableResponse.ok) {
+            handleErrorResponse();
+            return;
+        }
+
+        const timetableData = await timetableResponse.json();
+        danetemp = timetableData;
+
+        var dizin = decodeURIComponent(urlParams.get('dzien'));
+
+        if (!dizin || dizin === "null" || dizin === "") {
+            dizin = 0;
+            urlParams.set('dzien', "0");
+            window.location.search = urlParams;
+        } else if (dizin > 5) {
+            dizin = 0;
+            urlParams.set('dzien', "0");
+            window.location.search = urlParams;
+        } else {
+            selectElement.value = dizin;
+        }
+
+        handleReceivedData(parseInt(dizin));
     } catch (e) {
         console.error("Coś poszło nie tak: " + e.message);
-        createRowInfo(true, "WYSTĄPIŁ BŁĄD! - Przepraszamy za utrudnienia!")
+        createRowInfo(true, "WYSTĄPIŁ BŁĄD! - Przepraszamy za utrudnienia!");
         errornow = true;
         return;
     }
 }
 
 
-// Add an event listener for the change event
+function handleErrorResponse() {
+    console.error("Nie udało się pobrać danych z serwera");
+    createRowInfo(true, "ZŁY LINK! - Przepraszamy za utrudnienia!");
+    errornow = true;
+}
+
 selectElement.addEventListener("change", function () {
     const selectedOption = parseInt(selectElement.options[selectElement.selectedIndex].value);
     var x = document.getElementById('Tabela').childElementCount - 1;
 
     while (x >= 0) {
-        deleteRow(x)
-        x = x - 1
+        deleteRow(x);
+        x = x - 1;
     }
-    
-    if (errornow === true) {
+
+    if (errornow) {
         createRowInfo(true, "WYSTĄPIŁ BŁĄD! - Przepraszamy za utrudnienia!");
         return;
     }
-    
+
     handleReceivedData(selectedOption);
     nicknames(nicknamesstate);
 });
@@ -265,7 +272,6 @@ async function nicknames(change) {
         console.error("Nie udało się pobrać danych z serwera przezwisk");
     }
 
-    przeswiska = {};
     przeswiska = await response.json();
 
     var rows = document.getElementById("Tabela").getElementsByTagName("tr");
@@ -275,19 +281,11 @@ async function nicknames(change) {
         if (cell === undefined) {
             continue;
         }
-        if (change) {
-            for (var j = 0; j < Object.keys(przeswiska).length; j++) {
-                if (cell.innerHTML.replace(/&nbsp;/g, ' ') === Object.keys(przeswiska)[j]) {
-                    cell.innerHTML = Object.values(przeswiska)[j];
-                    break;
-                }
-            }
-        } else {
-            for (var j = 0; j < Object.keys(przeswiska).length; j++) {
-                if (cell.innerHTML.replace(/&nbsp;/g, ' ') === Object.values(przeswiska)[j]) {
-                    cell.innerHTML = Object.keys(przeswiska)[j];
-                    break;
-                }
+
+        for (var j = 0; j < Object.keys(przeswiska).length; j++) {
+            if (cell.innerHTML.replace(/&nbsp;/g, ' ') === (change ? Object.keys(przeswiska)[j] : Object.values(przeswiska)[j])) {
+                cell.innerHTML = (change ? Object.values(przeswiska)[j] : Object.keys(przeswiska)[j]);
+                break;
             }
         }
     }
